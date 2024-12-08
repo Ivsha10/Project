@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="width=device-width, initial-scale=1.0">
+    <title>Cart - xDefiant</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+    <style>
+        .cart-page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .cart-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .cart-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-list img {
+            max-width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .cart-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .checkout-button {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkout-button:hover {
+            background: linear-gradient(90deg, #feb47b, #ff7e5f);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
+        }
+
+        .checkout-button:active {
+            transform: scale(0.98);
+        }
+
+        .total-price {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cart-page">
+        <h1>Your Cart</h1>
+        <ul id="cart-list" class="cart-list"></ul>
+        <div class="total-price" id="total-price">Total: $0</div>
+        <div class="cart-actions">
+            <a href="checkout.html" class="checkout-button"">Proceed to Checkout</a>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script>
+        // View cart contents and calculate total price
+        async function fetchCart() {
+            try {
+                const response = await fetch('/api/cart');
+                const cart = await response.json();
+                const cartList = document.getElementById('cart-list');
+                const totalPriceElement = document.getElementById('total-price');
+                let total = 0;
+
+                cartList.innerHTML = cart.map(item => {
+                    const itemTotal = item.product.price * item.quantity;
+                    total += itemTotal;
+                    return `
+                        <li>
+                            <img src=" ${item.product.image}" alt="${item.product.name}">
+                <span>${item.product.name} - $${item.product.price} x ${item.quantity}</span>
+                <span>Subtotal: $${itemTotal.toFixed(2)}</span>
+                </li>
+                `;
+                }).join('');
+
+                totalPriceElement.textContent = `Total: $${total.toFixed(2)}`;
+            } catch (error) {
+                console.error('Error fetching cart:', error);
+            }
+        }
+
+        // Fake checkout functionality
+        async function checkout() {
+            try {
+                const response = await fetch('/api/cart/checkout', {
+                    method: 'POST',
+                });
+                const result = await response.json();
+                alert(result.message || "Checkout successful!");
+                // Optionally clear the cart after checkout
+                document.getElementById('cart-list').innerHTML = '';
+                document.getElementById('total-price').textContent = 'Total: $0';
+            } catch (error) {
+                console.error('Error during checkout:', error);
+            }
+        }
+
+        // Load cart on page load
+        document.addEventListener('DOMContentLoaded', fetchCart);
+    </script>
+</body>
+
+</html>

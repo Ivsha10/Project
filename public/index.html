@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xDefiant</title>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Limit product image width to 250px */
+    li {
+      border: 1px solid #dee1e4;
+      border-radius: 10px;
+      padding: 5px;
+    }
+
+    .product-card img {
+      max-width: 250px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+
+    }
+  </style>
+</head>
+
+<body id="top">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container">
+        <a href="index.html" class="logo">xDefiant</a>
+        <div class="header-actions">
+          <a href="cart.html" class="header-action-btn" aria-label="view cart">
+            <ion-icon name="bag-handle-outline"></ion-icon> View Cart
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <article>
+      <!-- HERO SECTION -->
+      <section class="section hero" id="home">
+        <div class="container">
+          <h1>Welcome to xDefiant</h1>
+          <p>Enhance Your Athletic Performance</p>
+        </div>
+      </section>
+
+      <!-- SHOP SECTION -->
+      <section class="section shop" id="shop">
+        <div class="container">
+          <h2>Available Products</h2>
+          <ul style="display: flex; justify-content: space-between;" id="product-list"></ul>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <!-- Custom JS -->
+  <script>
+    // Fetch products from backend
+    async function fetchProducts() {
+      try {
+        const response = await fetch('/api/products');
+        const products = await response.json();
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = products.map(product => `
+          <li>
+            <div class="product-card">
+              <img src="${product.image}" alt="${product.name}">
+              <h3>${product.name}</h3>
+              <p>Price: $${product.price}</p>
+              ${product.discount ? `<p>Discount: ${product.discount}</p>` : ''}
+              <button onclick="addToCart(${product.id})">Add to Cart</button>
+            </div>
+          </li>
+        `).join('');
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    }
+
+    // Add product to cart
+    async function addToCart(productId) {
+      try {
+        const response = await fetch('/api/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ productId, quantity: 1 })
+        });
+        const result = await response.json();
+        alert(result.message);
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+      }
+    }
+
+    // Load products on page load
+    document.addEventListener('DOMContentLoaded', fetchProducts);
+  </script>
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

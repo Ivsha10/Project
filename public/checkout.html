@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - xDefiant</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+    <style>
+        .checkout-page {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+
+        .checkout-page h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .checkout-form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .checkout-form input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .checkout-button {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .checkout-button:hover {
+            background: linear-gradient(90deg, #feb47b, #ff7e5f);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirmation-message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="checkout-page">
+        <h1>Checkout</h1>
+        <form class="checkout-form" id="checkout-form">
+            <label for="full-name">Full Name:</label>
+            <input type="text" id="full-name" name="full-name" placeholder="Enter your full name" required>
+
+            <label for="street-address">Street Address:</label>
+            <input type="text" id="street-address" name="street-address" placeholder="Enter your street address"
+                required>
+
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" placeholder="Enter your city" required>
+
+            <label for="state">State:</label>
+            <input type="text" id="state" name="state" placeholder="Enter your state" required>
+
+            <label for="postal-code">Postal Code:</label>
+            <input type="text" id="postal-code" name="postal-code" placeholder="Enter your postal code" required>
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+
+            <button type="button" class="checkout-button" onclick="submitOrder()">Submit Order</button>
+        </form>
+        <div id="confirmation-message" class="confirmation-message" style="display: none;">
+            Thank you! Your order has been placed. You will pay cash upon delivery.
+        </div>
+    </div>
+
+    <script>
+        async function submitOrder() {
+            const fullName = document.getElementById('full-name').value;
+            const streetAddress = document.getElementById('street-address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const postalCode = document.getElementById('postal-code').value;
+            const phone = document.getElementById('phone').value;
+
+            if (!fullName || !streetAddress || !city || !state || !postalCode || !phone) {
+                alert('Please fill out all fields.');
+                return;
+            }
+
+            const orderDetails = {
+                fullName,
+                streetAddress,
+                city,
+                state,
+                postalCode,
+                phone,
+                orderDate: new Date().toLocaleString(),
+            };
+
+            try {
+                // Send order details to the backend
+                const response = await fetch('/api/submit-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderDetails),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to submit order');
+                }
+
+                const result = await response.json();
+
+                // Redirect the user to the receipt page
+                if (result.receiptUrl) {
+                    window.location.href = result.receiptUrl;
+                } else {
+                    alert('Order submitted successfully, but no receipt URL was provided.');
+                }
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                alert('An error occurred while submitting your order. Please try again later.');
+            }
+        }
+    </script>
+</body>
+
+</html>
